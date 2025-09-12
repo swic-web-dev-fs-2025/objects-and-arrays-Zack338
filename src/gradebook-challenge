@@ -75,3 +75,4 @@ console.log("Class avg:", getClassAverage("math101"));
 
 const newGradebook = addAssignment("math101", "Homework 3", 50);
 console.log("New assignments:", newGradebook.courses[0].assignments);
+
