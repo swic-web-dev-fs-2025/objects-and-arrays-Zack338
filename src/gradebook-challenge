@@ -1,22 +1,32 @@
-// Gradebook Challenge
+// src/gradebook-challenge.js
 
+// Sample gradebook data
 const gradebook = {
   courses: [
     {
       id: "math101",
       name: "Math 101",
       assignments: [
-        { name: "Homework1", maxPoints: 50 },
-        { name: "Homework2", maxPoints: 40 },
+        { name: "Homework 1", maxPoints: 50 },
+        { name: "Homework 2", maxPoints: 50 },
       ],
       students: [
-        { id: "s1", name: "Alice", scores: { Homework1: 40, Homework2: 35 } },
-        { id: "s2", name: "Bob", scores: { Homework1: 30, Homework2: 25 } },
+        {
+          id: "s1",
+          name: "Alice",
+          scores: { "Homework 1": 45, "Homework 2": 40 },
+        },
+        {
+          id: "s2",
+          name: "Bob",
+          scores: { "Homework 1": 50, "Homework 2": 48 },
+        },
       ],
     },
   ],
 };
 
+// Get a student's percentage score
 function getStudentPercentage(courseId, studentId) {
   const course = gradebook.courses.find((c) => c.id === courseId);
   if (!course) return null;
@@ -24,7 +34,10 @@ function getStudentPercentage(courseId, studentId) {
   const student = course.students.find((s) => s.id === studentId);
   if (!student) return null;
 
-  const totalMax = course.assignments.reduce((acc, a) => acc + a.maxPoints, 0);
+  const totalMax = course.assignments.reduce(
+    (acc, a) => acc + a.maxPoints,
+    0
+  );
 
   const totalScore = Object.entries(student.scores).reduce(
     (acc, [assignment, score]) => {
@@ -38,6 +51,7 @@ function getStudentPercentage(courseId, studentId) {
   return (totalScore / totalMax) * 100;
 }
 
+// Get class average for a course
 function getClassAverage(courseId) {
   const course = gradebook.courses.find((c) => c.id === courseId);
   if (!course) return null;
@@ -45,32 +59,32 @@ function getClassAverage(courseId) {
   const percentages = course.students.map((s) =>
     getStudentPercentage(courseId, s.id)
   );
+
   return percentages.reduce((a, b) => a + b, 0) / percentages.length;
 }
 
+// Add a new assignment immutably
 function addAssignment(courseId, assignmentName, maxPoints) {
-  const course = gradebook.courses.find((c) => c.id === courseId);
-  if (!course) return gradebook;
-
-  const newCourse = {
-    ...course,
-    assignments: [...course.assignments, { name: assignmentName, maxPoints }],
-    students: course.students.map((s) => ({
-      ...s,
-      scores: { ...s.scores, [assignmentName]: 0 },
-    })),
-  };
-
   return {
     ...gradebook,
-    courses: gradebook.courses.map((c) => (c.id === courseId ? newCourse : c)),
+    courses: gradebook.courses.map((c) =>
+      c.id === courseId
+        ? {
+            ...c,
+            assignments: [
+              ...c.assignments,
+              { name: assignmentName, maxPoints },
+            ],
+          }
+        : c
+    ),
   };
 }
 
-// Export everything for use in index.js
-module.exports = {
-  gradebook,
-  getStudentPercentage,
-  getClassAverage,
-  addAssignment,
-};
+// Test calls
+console.log("Alice %:", getStudentPercentage("math101", "s1").toFixed(2));
+console.log("Bob %:", getStudentPercentage("math101", "s2").toFixed(2));
+console.log("Class avg:", getClassAverage("math101").toFixed(2));
+
+const newGradebook = addAssignment("math101", "Homework 3", 50);
+console.log("New assignments:", newGradebook.courses[0].assignments);
